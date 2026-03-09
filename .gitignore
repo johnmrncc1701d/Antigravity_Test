@@ -3,3 +3,4 @@ start_server.bat
 stop_server.bat
 __pycache__/checkers_logic.cpython-311.pyc
 __pycache__/server.cpython-311.pyc
+info.txt
