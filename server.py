@@ -5,11 +5,11 @@ import uuid
 import time
 import threading
 import os
-import ssl
 from typing import Dict, Any
 from checkers_logic import CheckersGame
 
-PORT = 80
+HOST = os.environ.get("CHECKERS_HOST", "127.0.0.1")
+PORT = int(os.environ.get("CHECKERS_PORT", "80"))
 games: Dict[str, Dict[str, Any]] = {} # game_id -> {"game": CheckersGame, "last_activity": float}
 
 # Cleanup thread
@@ -29,6 +29,10 @@ thread.start()
 
 class CheckersHandler(http.server.SimpleHTTPRequestHandler):
     def do_GET(self):
+        if self.path == "/api/health":
+            self._send_json(200, {"ok": True, "host": HOST, "port": PORT})
+            return
+
         if self.path.startswith("/api/state"):
             from urllib.parse import urlparse, parse_qs
             parsed = urlparse(self.path)
@@ -135,18 +139,8 @@ class CheckersHandler(http.server.SimpleHTTPRequestHandler):
 if __name__ == "__main__":
     os.chdir(os.path.dirname(os.path.abspath(__file__)))
     Handler = CheckersHandler
-    
-    # In a Cloudways/Reverse Proxy environment, we ONLY bind to localhost
-    # the public Nginx server will forward traffic to this internal port.
-    HOST = "127.0.0.1"
-    
-    while True:
-        try:
-            httpd = socketserver.TCPServer((HOST, PORT), Handler)
-            break
-        except OSError:
-            PORT += 1
-            
-    print(f"Backend Server listening securely on http://{HOST}:{PORT}")
-    print("Ensure your Nginx reverse proxy is configured to forward traffic here!")
+
+    httpd = socketserver.TCPServer((HOST, PORT), Handler)
+    print(f"Backend Server listening on http://{HOST}:{PORT}")
+    print("Configure your reverse proxy to forward /api to this host:port")
     httpd.serve_forever()

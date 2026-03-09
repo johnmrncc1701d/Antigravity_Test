@@ -20,6 +20,25 @@ const invitePanel = document.getElementById('invite-panel');
 const gameIdDisplay = document.getElementById('game-id-display');
 const menuError = document.getElementById('menu-error');
 
+async function parseApiResponse(res) {
+    const contentType = (res.headers.get('content-type') || '').toLowerCase();
+    const raw = await res.text();
+
+    if (contentType.includes('application/json')) {
+        try {
+            const data = JSON.parse(raw);
+            if (!res.ok) {
+                throw new Error(data.error || `HTTP ${res.status}`);
+            }
+            return data;
+        } catch {
+            throw new Error(`Invalid JSON from API (HTTP ${res.status})`);
+        }
+    }
+
+    throw new Error(`API unavailable at ${API_BASE} (HTTP ${res.status})`);
+}
+
 function showScreen(screenName) {
     Object.values(screens).forEach(s => s.classList.remove('active'));
     screens[screenName].classList.add('active');
@@ -28,7 +47,7 @@ function showScreen(screenName) {
 document.getElementById('btn-create').addEventListener('click', async () => {
     try {
         const res = await fetch(`${API_BASE}/new_game`, { method: 'POST' });
-        const data = await res.json();
+        const data = await parseApiResponse(res);
         
         gameId = data.game_id;
         sessionId = data.session_id;
@@ -39,7 +58,7 @@ document.getElementById('btn-create').addEventListener('click', async () => {
         
         startGame();
     } catch (e) {
-        menuError.textContent = "Error creating game.";
+        menuError.textContent = e.message || "Error creating game.";
     }
 });
 
@@ -53,7 +72,7 @@ document.getElementById('btn-join').addEventListener('click', async () => {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ game_id: input })
         });
-        const data = await res.json();
+        const data = await parseApiResponse(res);
         
         if (data.error) {
             menuError.textContent = data.error;
@@ -67,7 +86,7 @@ document.getElementById('btn-join').addEventListener('click', async () => {
         invitePanel.style.display = 'none';
         startGame();
     } catch (e) {
-        menuError.textContent = "Error joining game.";
+        menuError.textContent = e.message || "Error joining game.";
     }
 });
 
@@ -116,7 +135,7 @@ async function pollState() {
     
     try {
         const res = await fetch(`${API_BASE}/state?game_id=${gameId}`);
-        const state = await res.json();
+        const state = await parseApiResponse(res);
         
         if (state.error) {
             alert("Game ended or not found");
@@ -266,7 +285,7 @@ async function submitMove(path) {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ game_id: gameId, session_id: sessionId, path })
         });
-        const data = await res.json();
+        const data = await parseApiResponse(res);
         if (data.success) {
             currentPath = [];
             pollState(); // Get latest board immediately
