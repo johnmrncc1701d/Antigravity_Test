@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Neon Checkers</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="app">
+        <header>
+            <h1>NEON CHECKERS</h1>
+            <div id="game-status">Waiting to start...</div>
+        </header>
+
+        <main id="menu-screen" class="screen active">
+            <div class="glass-panel">
+                <h2 style="text-align: center;">Play Online</h2>
+                <button id="btn-create" class="btn primary">Create Game</button>
+                <div class="divider">OR</div>
+                <input type="text" id="input-join" placeholder="Enter Game ID">
+                <button id="btn-join" class="btn secondary">Join Game</button>
+            </div>
+            <div id="menu-error" class="error-msg"></div>
+        </main>
+
+        <main id="game-screen" class="screen">
+            <div class="game-info glass-panel">
+                <div class="players-container" style="display: flex; justify-content: space-between; width: 100%;">
+                    <div class="player-info p1">
+                        <span class="color-dot red"></span> Player 1
+                    </div>
+                    <div id="turn-indicator" class="turn-indicator">Your Turn</div>
+                    <div class="player-info p2">
+                        <span class="color-dot cyan"></span> Player 2
+                    </div>
+                </div>
+            </div>
+            
+            <div id="invite-panel" class="glass-panel text-center" style="display: none;">
+                <p>Share this Game ID with your opponent:</p>
+                <div class="code-box"><code id="game-id-display"></code></div>
+                <p class="waiting-text" style="color: var(--text-muted);">Waiting for opponent to join...</p>
+            </div>
+
+            <div id="board-container">
+                <div id="checkers-board"></div>
+            </div>
+            
+            <button id="btn-leave" class="btn danger" style="margin-top:20px;">Leave Game</button>
+        </main>
+    </div>
+    
+    <script src="script.js"></script>
+</body>
+</html>
