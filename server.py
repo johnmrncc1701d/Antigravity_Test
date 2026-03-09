@@ -140,7 +140,21 @@ if __name__ == "__main__":
     os.chdir(os.path.dirname(os.path.abspath(__file__)))
     Handler = CheckersHandler
 
-    httpd = socketserver.TCPServer((HOST, PORT), Handler)
-    print(f"Backend Server listening on http://{HOST}:{PORT}")
-    print("Configure your reverse proxy to forward /api to this host:port")
+    class ReusableTCPServer(socketserver.TCPServer):
+        allow_reuse_address = True
+
+    bind_port = PORT
+    try:
+        httpd = ReusableTCPServer((HOST, bind_port), Handler)
+    except PermissionError:
+        fallback_port = int(os.environ.get("CHECKERS_FALLBACK_PORT", "8081"))
+        print(f"Permission denied binding to {HOST}:{bind_port}. Falling back to {HOST}:{fallback_port}")
+        bind_port = fallback_port
+        httpd = ReusableTCPServer((HOST, bind_port), Handler)
+
+    print(f"Backend Server listening on http://{HOST}:{bind_port}")
+    if bind_port != PORT:
+        print("Update your reverse proxy to forward /api to the fallback port shown above")
+    else:
+        print("Configure your reverse proxy to forward /api to this host:port")
     httpd.serve_forever()

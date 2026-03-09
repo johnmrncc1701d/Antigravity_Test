@@ -8,7 +8,7 @@
  */
 
 $host = '127.0.0.1';
-$backend_port = 80;
+$backend_port = (int)(getenv('CHECKERS_PORT') ?: 80);
 $server_script = __DIR__ . DIRECTORY_SEPARATOR . 'server.py';
 $log_file = __DIR__ . DIRECTORY_SEPARATOR . 'server.log';
 $mtime_file = __DIR__ . DIRECTORY_SEPARATOR . '.server_mtime';
