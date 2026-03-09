@@ -8,7 +8,7 @@
  */
 
 $host = '127.0.0.1';
-$port = 8000;
+$port = 80;
 $server_script = __DIR__ . DIRECTORY_SEPARATOR . 'server.py';
 $log_file = __DIR__ . DIRECTORY_SEPARATOR . 'server.log';
 

@@ -9,7 +9,7 @@ import ssl
 from typing import Dict, Any
 from checkers_logic import CheckersGame
 
-PORT = 8000
+PORT = 80
 games: Dict[str, Dict[str, Any]] = {} # game_id -> {"game": CheckersGame, "last_activity": float}
 
 # Cleanup thread
