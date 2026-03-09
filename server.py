@@ -5,6 +5,7 @@ import uuid
 import time
 import threading
 import os
+import ssl
 from typing import Dict, Any
 from checkers_logic import CheckersGame
 
@@ -134,6 +135,18 @@ class CheckersHandler(http.server.SimpleHTTPRequestHandler):
 if __name__ == "__main__":
     os.chdir(os.path.dirname(os.path.abspath(__file__)))
     Handler = CheckersHandler
-    with socketserver.TCPServer(("", PORT), Handler) as httpd:
-        print(f"Serving at port {PORT}")
-        httpd.serve_forever()
+    
+    # In a Cloudways/Reverse Proxy environment, we ONLY bind to localhost
+    # the public Nginx server will forward traffic to this internal port.
+    HOST = "127.0.0.1"
+    
+    while True:
+        try:
+            httpd = socketserver.TCPServer((HOST, PORT), Handler)
+            break
+        except OSError:
+            PORT += 1
+            
+    print(f"Backend Server listening securely on http://{HOST}:{PORT}")
+    print("Ensure your Nginx reverse proxy is configured to forward traffic here!")
+    httpd.serve_forever()
